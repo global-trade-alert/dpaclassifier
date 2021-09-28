@@ -123,8 +123,8 @@ dpa_train_model = function(training.testing.split = 0.82,
 
   #this will save which cols were used to generate embeddings which are
   #concatenated later and used to train the concatenated hypermodel
-  hypermodel_emb_fname = paste0("data/dpa classifier/", format(Sys.Date(), "%Y-%m-%d"), "_dpa_conc_hypermodel_embeddings.Rdata")
-  save(training.cols, file = hypermodel_emb_fname)
+  hypermodel_emb_cols_fname = paste0("data/dpa classifier/", format(Sys.Date(), "%Y-%m-%d"), "_dpa_conc_hypermodel_training_cols.rda")
+  save(training.cols, file = hypermodel_emb_cols_fname)
 
 
   set.seed(221)
