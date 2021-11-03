@@ -6,6 +6,8 @@ dpa_train_model = function(training.testing.split = 0.82,
                            hypermodel.method = "XGB" #TODO remove default param
                            ){
 
+
+
   dpa_classifier_init()
 
 
@@ -132,7 +134,7 @@ dpa_train_model = function(training.testing.split = 0.82,
 
 
 
-  x.train$evaluation = as.factor(training.dpa$relevant)
+  #x.train$evaluation = as.factor(training.dpa$relevant)
 
   hc.relevant = ifelse(test = training.dpa$relevant==1,
                        yes = "yes",
