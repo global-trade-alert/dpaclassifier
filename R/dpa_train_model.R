@@ -6,7 +6,9 @@ dpa_train_model = function(training.testing.split = 0.82,
                            hypermodel.method = "XGB" #TODO remove default param
                            ){
 
-
+  if(training.testing.split != 1){
+    message()
+  }
 
   dpa_classifier_init()
 
@@ -45,6 +47,7 @@ dpa_train_model = function(training.testing.split = 0.82,
   # Preprocess text ---------------------------------------------------------
 
   orig.rows=nrow(training.dpa.full)
+  orig.bids = training.dpa.full$bid
 
   print("preprocessing text...")
   for(col in training.cols){
@@ -59,7 +62,8 @@ dpa_train_model = function(training.testing.split = 0.82,
     rm(col.idx)
   }
 
-  warning(paste(orig.rows-nrow(training.dpa.full), "rows removed during preprocessing! probably because they consisted of only bad chars ([^A-z]) which cannot be classified!"))
+  rem.bids = which(! orig.bids %in% training.dpa.full$bid) %>% paste(collapse = ", ")
+  warning(paste(orig.rows-nrow(training.dpa.full), "rows removed during preprocessing! probably because they consisted of only bad chars ([^A-z]) which cannot be classified! The BIDs for the removed rows were:", rem.bids))
 
 
 
