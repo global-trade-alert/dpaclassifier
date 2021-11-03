@@ -1,9 +1,10 @@
 dpa_classifier_init = function(){
-  
-  
+
+
 
 # dependencies ------------------------------------------------------------
-  
+
+  library(dpaclassifier)
   library(dplyr)
   library(gtasql)
   library(pool)
@@ -11,8 +12,8 @@ dpa_classifier_init = function(){
   library(stringr)
   library(stats)
   library(randomForest)
-  
-  
+
+
 
 # check in correct wd -----------------------------------------------------
 
@@ -20,6 +21,6 @@ dpa_classifier_init = function(){
   wd.pref = str_extract(getwd(), ".+GTA data team Dropbox")
   bastiat.path = paste0(wd.pref, "/Bastiat")
   setwd(bastiat.path)
-  
-  
+
+
 }
