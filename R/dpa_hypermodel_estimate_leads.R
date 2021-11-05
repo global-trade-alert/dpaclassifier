@@ -2,23 +2,40 @@ dpa_hypermodel_estimate_leads = function(leads.core, conf.cutoff = 0.2){
 
 
   #rename cols to match db
+  #because classifier was built with db colnames
   colname.conversion = data.frame(
     db.name = c("hint.title", "hint.description"),
     rs.name = c("act.title.en", "act.description.en"),
     stringsAsFactors = F
   )
 
-  for(col in colnames(leads.core)){
 
+  for(col in colnames(leads.core.classify)){
     if(col %in% colname.conversion$rs.name){
-
-      colnames(leads.core)[colnames(leads.core)==col] = colname.conversion$db.name[colname.conversion$rs.name==col]
-
+      colnames(leads.core.classify)[colnames(leads.core.classify)==col] = colname.conversion$db.name[colname.conversion$rs.name==col]
     }
-
-
   }
 
+  #remove any that are too few chars
+
+  #set criteria
+  to.classify = (paste(leads.core$hint.title, leads.core$hint.description) %>%
+    nchar() > 5) & !is.na(leads.core$hint.description)
+
+  if(sum(to.classify)==0){
+
+    print("No leads eligible for classification because description nchar < 5 or is NA. NA will be returned.")
+
+    return(list(binary.prediction.result = rep(NA, nrow(leads.core)),
+                raw.score = rep(NA, nrow(leads.core)))
+    )
+
+  } else if(sum(to.classify)<nrow(leads.core)){
+    print(paste0((nrow(leads.core)-sum(to.classify)), " leads not eligible for classification as description nchar < 5 or is NA."))
+  }else if(sum(to.classify)==nrow(leads.core)){
+    print("Classifying all input leads.")
+  }
+  leads.core.classify = leads.core[to.classify,]
 
   #list relevant files
   current.wd = getwd()
@@ -31,8 +48,8 @@ dpa_hypermodel_estimate_leads = function(leads.core, conf.cutoff = 0.2){
   dpa.hypermodel.fname = dpa.hypermodel.list[length(dpa.hypermodel.list)]
   load(dpa.hypermodel.fname)
 
-  #x.predict = dpa_generate_col_probs(leads.core)
-  x.predict = dpa_gen_d2v_conc(leads.core)
+  #x.predict = dpa_generate_col_probs(leads.core.classify)
+  x.predict = dpa_gen_d2v_conc(leads.core.classify)
 
   #deal with NAs, assuming they are from as-yet-unknown inputs, e.g. new AA
   #this means you need to retrain the model, but of course some training data is needed!
@@ -69,14 +86,20 @@ dpa_hypermodel_estimate_leads = function(leads.core, conf.cutoff = 0.2){
   predict.result = predict(dpa.hypermodel$hypermodel, newdata=x.predict, type = "prob", verbose = T) %>%
     as.data.frame()
 
+
   #get results ready
 
   binary.prediction.result = predict.result$yes > conf.cutoff
+  names(binary.prediction.result) = leads.core.classify$bid
+
+  raw.score = predict.result$yes
+  names(raw.score) = leads.core.classify$bid
+
 
   return(
     list(
       binary.prediction.result = binary.prediction.result,
-      raw.score = predict.result$yes
+      raw.score = raw.score
     )
   )
 
