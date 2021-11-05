@@ -90,12 +90,12 @@ dpa_hypermodel_estimate_leads = function(leads.core, conf.cutoff = 0.2){
   #get results ready
 
   binary.prediction.result = data.frame(bid = leads.core.classify$bid,
-                                        predict.result$yes > conf.cutoff,
+                                        relevant = predict.result$yes > conf.cutoff,
                                         stringsAsFactors = F)
 
 
-  raw.score = data.frame(leads.core.classify$bid,
-                         predict.result$yes,
+  raw.score = data.frame(bid = leads.core.classify$bid,
+                         relevance.probability = predict.result$yes,
                          stringsAsFactors = F)
 
 
