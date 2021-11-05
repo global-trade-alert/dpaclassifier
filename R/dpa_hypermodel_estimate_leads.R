@@ -10,9 +10,9 @@ dpa_hypermodel_estimate_leads = function(leads.core, conf.cutoff = 0.2){
   )
 
 
-  for(col in colnames(leads.core.classify)){
+  for(col in colnames(leads.core)){
     if(col %in% colname.conversion$rs.name){
-      colnames(leads.core.classify)[colnames(leads.core.classify)==col] = colname.conversion$db.name[colname.conversion$rs.name==col]
+      colnames(leads.core)[colnames(leads.core)==col] = colname.conversion$db.name[colname.conversion$rs.name==col]
     }
   }
 
