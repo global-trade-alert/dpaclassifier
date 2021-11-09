@@ -7,7 +7,7 @@ dpa_train_model = function(training.testing.split = 0.82,
                            ){
 
   if(training.testing.split != 1){
-    message()
+    message("Training/testing split <1; performance metrics will be generated automatically.")
   }
 
   dpa_classifier_init()
@@ -349,26 +349,26 @@ dpa_train_model = function(training.testing.split = 0.82,
 
     print(paste("The retain quantile used for testing is", 1-training.testing.split))
 
-    #x.test$evaluation = as.factor(testing.dpa$evaluation)
-
-    #predictRF = as.data.frame(predict(dpa.hypermodel, newdata=x.test, type = "prob"))
-    #table(x.test$evaluation, predictRF)
-
     estimation=dpa_hypermodel_estimate_leads(testing.dpa)
 
-    testing.dpa.metrics = cbind(testing.dpa, estimation$raw.score, estimation$binary.prediction.result)
-    #testing.dpa$predictRF = testing.dpa$`TRUE` > quantile(testing.dpa$`TRUE`, 0.2)
-    #testing.dpa$predictRF = testing.dpa$`TRUE` > 0.2
-    testing.dpa.metrics$correct = testing.dpa.metrics$`estimation$binary.prediction.result` == testing.dpa.metrics$relevant
+    #original col called "relevance" was used for training
+    #dpa_hypermodel_estimate_leads() also creates col called "relevance" to allow merging with bt_leads_core_update()
+    #in this case, we need to compare the two "relevances" so rename the new one
+    colnames(estimation$binary.prediction.result) = c("bid", "hypermodel.relevance")
 
-    pr.metrics=dpa_generate_pr_metrics(model.prediction = testing.dpa.metrics$`estimation$binary.prediction.result`,
+    testing.dpa.metrics = testing.dpa
+    testing.dpa.metrics = merge(testing.dpa.metrics, estimation$raw.score, all.x = T)
+    testing.dpa.metrics = merge(testing.dpa.metrics, estimation$binary.prediction.result, all.x = T)
+    testing.dpa.metrics$correct = testing.dpa.metrics$hypermodel.relevance == testing.dpa.metrics$relevant
+
+    pr.metrics=dpa_generate_pr_metrics(model.prediction = testing.dpa.metrics$hypermodel.relevance,
                                        real.label = testing.dpa.metrics$relevant,
                                        model.name = hypermodel.method)
 
 
 
     # R AT K SCORING
-    testing.dpa.rak = testing.dpa.metrics[order(-testing.dpa.metrics$`estimation$raw.score`),]
+    testing.dpa.rak = testing.dpa.metrics[order(-testing.dpa.metrics$relevance.probability),]
 
     tot.rlv = sum(testing.dpa.rak$relevant)
 
@@ -392,13 +392,12 @@ dpa_train_model = function(training.testing.split = 0.82,
 
     }
 
-    r.at.k.all = merge(r.at.k.all, r.at.k)
-
-    #r.at.k.all = data.frame(results.percentile=seq(10, 100, 10))
+    #use this if testing several models
+    #r.at.k.all = merge(r.at.k.all, r.at.k)
 
     library(reshape2)
 
-    plotdata = melt(r.at.k.all, id = "results.percentile")
+    plotdata = melt(r.at.k, id = "results.percentile")
 
     ggplot(data=plotdata,
            aes(x=results.percentile, y=value, colour=variable)) +
