@@ -23,6 +23,7 @@ dpa_scraper_master = function(){
     specialised.scraper = F,
     stock.data.file = "",
     scraper.legal.area = "",
+    bid.stem = "",
     stringsAsFactors = F
   )
 
@@ -148,6 +149,10 @@ dpa_scraper_master = function(){
             most.recent = max(table.stock$act.date, na.rm = T)
           }
           scraper.master$most.recent[scraper.master$scraper.path == scraper.path] = most.recent
+
+          scraper.master$bid.stem[scraper.master$scraper.path == scraper.path] = gsub(pattern = "\\d+$",
+                                                                                      replacement = "",
+                                                                                      x=table.stock$bid[1])
 
           rm(table.stock)
         }
