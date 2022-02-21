@@ -24,6 +24,7 @@ dpa_scraper_master = function(){
     stock.data.file = "",
     scraper.legal.area = "",
     bid.stem = "",
+    requires.translation = F,
     stringsAsFactors = F
   )
 
@@ -163,6 +164,11 @@ dpa_scraper_master = function(){
 
       }
     )
+
+
+    if(any(grepl("bt_translate", scraper.code))){
+      scraper.master$requires.translation[scraper.master$scraper.path == scraper.path] = T
+    }
 
 
 
